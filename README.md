@@ -141,18 +141,18 @@ npm run dev
 | `POST` | `/api/articles` | 建立新文章 |
 | `GET` | `/api/articles/{id}` | 取得指定文章詳情 |
 | `GET` | `/api/articles/{id}/edit` | 取得欲編輯的文章資料（含標籤） |
-| `PUT` | `/api/articles/{id}/edit` | 更新指定文章 |
-| `DELETE` | `/api/articles/{id}/delete` | 刪除指定文章 |
+| `PUT` | `/api/articles/{id}` (亦相容 `/edit`) | 更新指定文章 |
+| `DELETE` | `/api/articles/{id}` (亦相容 `/delete`) | 刪除指定文章 |
 | `GET` | `/api/categories` | 獲取分類列表 |
 | `POST` | `/api/categories` | 建立新分類 |
-| `GET` | `/api/categories/{id}/edit` | 取得指定分類資料 |
-| `PUT` | `/api/categories/{id}/edit` | 更新指定分類 |
-| `DELETE` | `/api/categories/{id}/delete` | 刪除指定分類 |
+| `GET` | `/api/categories/{id}` | 取得指定分類資料 |
+| `PUT` | `/api/categories/{id}` (亦相容 `/edit`) | 更新指定分類 |
+| `DELETE` | `/api/categories/{id}` (亦相容 `/delete`) | 刪除指定分類 |
 | `GET` | `/api/tags` | 獲取標籤列表 |
 | `POST` | `/api/tags` | 建立新標籤 |
-| `GET` | `/api/tags/{id}/edit` | 取得指定標籤資料 |
-| `PUT` | `/api/tags/{id}/edit` | 更新指定標籤 |
-| `DELETE` | `/api/tags/{id}/delete` | 刪除指定標籤 |
+| `GET` | `/api/tags/{id}` | 取得指定標籤資料 |
+| `PUT` | `/api/tags/{id}` (亦相容 `/edit`) | 更新指定標籤 |
+| `DELETE` | `/api/tags/{id}` (亦相容 `/delete`) | 刪除指定標籤 |
 
 ---
 

@@ -1,82 +1,90 @@
 <template>
-    <div class="container mt-5">
-        <ul class="list-group" v-if="Object.keys(this.errorList).length > 0">
-            <li class="list-group-item" v-for="(error, index) in this.errorList" :key="index">{{ error[0] }}</li>
-        </ul>
-        <form>
-            <div class="mb-3">
-                <label for="" class="form-label">名稱</label>
-                <input type="text" v-model="model.category.name" class="form-control">
-            </div>
-            <button type="button" @click="updateCategory" class="btn btn-warning">更新</button>
+  <div class="container mt-5">
+    <div class="card shadow-sm col-md-8 mx-auto">
+      <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">編輯分類</h4>
+        <RouterLink to="/categories" class="btn btn-sm btn-outline-dark">返回列表</RouterLink>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-danger" v-if="errorList && Object.keys(errorList).length > 0">
+          <ul class="mb-0 ps-3">
+            <li v-for="(errors, key) in errorList" :key="key">{{ errors[0] }}</li>
+          </ul>
+        </div>
+
+        <div v-if="isLoading" class="text-center py-4">正在載入分類資料...</div>
+
+        <form v-else @submit.prevent="updateCategory">
+          <div class="mb-3">
+            <label class="form-label fw-bold">分類名稱 <span class="text-danger">*</span></label>
+            <input type="text" v-model="form.name" class="form-control" placeholder="請輸入分類名稱" required>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <RouterLink to="/categories" class="btn btn-secondary">取消</RouterLink>
+            <button type="submit" class="btn btn-warning" :disabled="isSubmitting">
+              {{ isSubmitting ? '更新中...' : '更新' }}
+            </button>
+          </div>
         </form>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
-import axios from "axios";
-import Swal from "sweetalert2";
+import api from "@/services/api";
+import { showSuccess, showError } from "@/utils/alert";
 
 export default {
-    name: "categoryEdit",
-    data() {
-        return {
-            categoryId: "",
-            errorList: '',
-            model: {
-                category: {
-                    name: ''
-                }
-            }
+  name: "categoryEdit",
+  data() {
+    return {
+      categoryId: "",
+      errorList: null,
+      isLoading: false,
+      isSubmitting: false,
+      form: {
+        name: "",
+      },
+    };
+  },
+  mounted() {
+    this.categoryId = this.$route.params.id;
+    this.getCategoryData();
+  },
+  methods: {
+    async getCategoryData() {
+      this.isLoading = true;
+      try {
+        const res = await api.get(`/categories/${this.categoryId}`);
+        this.form.name = res.data.category?.name || "";
+      } catch (error) {
+        showError("載入失敗", error.response?.data?.message || "找不到該分類");
+        this.$router.push("/categories");
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async updateCategory() {
+      this.isSubmitting = true;
+      this.errorList = null;
+
+      try {
+        const res = await api.put(`/categories/${this.categoryId}`, this.form);
+        await showSuccess(res.data.message || "分類更新成功");
+        this.$router.push("/categories");
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+          this.errorList = error.response.data.errors;
+        } else {
+          showError("更新失敗", error.response?.data?.message || "伺服器發生錯誤");
         }
+      } finally {
+        this.isSubmitting = false;
+      }
     },
-    mounted() {
-        this.categoryId = this.$route.params.id;
-        this.getCategoryData(this.$route.params.id);
-    },
-    methods: {
-
-        getCategoryData(categoryId) {
-
-            axios.get(`http://127.0.0.1:8000/api/categories/${categoryId}/edit`).then(res => {
-                console.log(res.data.category);
-                this.model.category = res.data.category;
-            })
-                .catch(function (error) {
-                    if (error.response) {
-                        if (error.response.status == 404) {
-                            alert(error.response.data.message);
-                        }
-                    }
-                });
-        },
-
-        updateCategory() {
-
-            var mythis = this;
-            axios.put(`http://127.0.0.1:8000/api/categories/${this.categoryId}/edit`, this.model.category).then(res => {
-
-                console.log(res.data);
-                Swal.fire(res.data.message);
-
-                this.errorList = '';
-            })
-                .catch(function (error) {
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            mythis.errorList = error.response.data.errors;
-                        }
-                        if (error.response.status == 404) {
-                            alert(error.response.data.message);
-                        }
-                    } else if (error.request) {
-                        console.log(error.request);
-                    } else {
-                        console.log("Error", error.message);
-                    }
-
-                })
-        }
-    },
-}
+  },
+};
 </script>

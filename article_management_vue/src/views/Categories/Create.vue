@@ -1,61 +1,69 @@
 <template>
-    <div class="container mt-5">
-        <ul class="list-group" v-if="Object.keys(this.errorList).length > 0">
-            <li class="list-group-item" v-for="(error, index) in this.errorList" :key="index">{{ error[0] }}</li>
-        </ul>
-        <form>
-            <div class="mb-3">
-                <label for="" class="form-label">名稱</label>
-                <input type="text" v-model="model.category.name" class="form-control">
-            </div>
-            <button type="button" @click="saveCategory" class="btn btn-primary">儲存</button>
+  <div class="container mt-5">
+    <div class="card shadow-sm col-md-8 mx-auto">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">新增分類</h4>
+        <RouterLink to="/categories" class="btn btn-sm btn-light">返回列表</RouterLink>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-danger" v-if="errorList && Object.keys(errorList).length > 0">
+          <ul class="mb-0 ps-3">
+            <li v-for="(errors, key) in errorList" :key="key">{{ errors[0] }}</li>
+          </ul>
+        </div>
+
+        <form @submit.prevent="saveCategory">
+          <div class="mb-3">
+            <label class="form-label fw-bold">分類名稱 <span class="text-danger">*</span></label>
+            <input type="text" v-model="form.name" class="form-control" placeholder="請輸入分類名稱" required>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <RouterLink to="/categories" class="btn btn-secondary">取消</RouterLink>
+            <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+              {{ isSubmitting ? '儲存中...' : '儲存' }}
+            </button>
+          </div>
         </form>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/services/api";
+import { showSuccess, showError } from "@/utils/alert";
 
 export default {
-    name: "categoryCreate",
-    data() {
-        return {
-            errorList: '',
-            model: {
-                category: {
-                    name: ''
-                }
-            }
+  name: "categoryCreate",
+  data() {
+    return {
+      errorList: null,
+      isSubmitting: false,
+      form: {
+        name: "",
+      },
+    };
+  },
+  methods: {
+    async saveCategory() {
+      this.isSubmitting = true;
+      this.errorList = null;
+
+      try {
+        const res = await api.post("/categories", this.form);
+        await showSuccess(res.data.message || "分類建立成功");
+        this.$router.push("/categories");
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+          this.errorList = error.response.data.errors;
+        } else {
+          showError("儲存失敗", error.response?.data?.message || "伺服器發生錯誤");
         }
+      } finally {
+        this.isSubmitting = false;
+      }
     },
-    methods: {
-
-        saveCategory() {
-
-            var mythis = this;
-            axios.post("http://127.0.0.1:8000/api/categories", this.model.category).then(res => {
-
-                console.log(res.data);
-                alert(res.data.message);
-
-                this.model.category = {
-                    name: ''
-                }
-                this.errorList = '';
-            })
-                .catch(function (error) {
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            mythis.errorList = error.response.data.errors;
-                        }
-                    } else if (error.request) {
-                        console.log(error.request);
-                    } else {
-                        console.log("Error", error.message);
-                    }
-
-                })
-        }
-    },
-}
+  },
+};
 </script>
