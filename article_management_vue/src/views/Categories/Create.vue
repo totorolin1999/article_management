@@ -1,30 +1,70 @@
 <template>
-  <div class="container mt-5">
-    <div class="card shadow-sm col-md-8 mx-auto">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">新增分類</h4>
-        <RouterLink to="/categories" class="btn btn-sm btn-light">返回列表</RouterLink>
-      </div>
-      <div class="card-body">
-        <div class="alert alert-danger" v-if="errorList && Object.keys(errorList).length > 0">
-          <ul class="mb-0 ps-3">
-            <li v-for="(errors, key) in errorList" :key="key">{{ errors[0] }}</li>
-          </ul>
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-6">
+        <!-- 導航麵包屑 -->
+        <nav aria-label="breadcrumb" class="mb-3">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><RouterLink to="/categories">分類列表</RouterLink></li>
+            <li class="breadcrumb-item active" aria-current="page">新增分類</li>
+          </ol>
+        </nav>
+
+        <div class="card card-modern border-0">
+          <div class="card-header-modern d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-folder-plus text-success"></i>
+                新增文章分類
+              </h5>
+              <small class="text-muted">建立新的分類以歸類文章</small>
+            </div>
+            <RouterLink to="/categories" class="btn btn-sm btn-outline-secondary">
+              返回
+            </RouterLink>
+          </div>
+
+          <div class="card-body p-4">
+            <div class="alert alert-danger d-flex align-items-center gap-2" v-if="errorList && Object.keys(errorList).length > 0">
+              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+              <div>
+                <ul class="mb-0 ps-3">
+                  <li v-for="(errors, key) in errorList" :key="key">{{ errors[0] }}</li>
+                </ul>
+              </div>
+            </div>
+
+            <form @submit.prevent="saveCategory">
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">
+                  分類名稱 <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light text-muted">
+                    <i class="bi bi-folder2"></i>
+                  </span>
+                  <input
+                    type="text"
+                    v-model="form.name"
+                    class="form-control"
+                    placeholder="例如：技術筆記、前端開發、隨筆心得"
+                    required
+                  />
+                </div>
+                <div class="form-text">分類名稱應簡明扼要，便於讀者理解文章主題。</div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2 pt-2">
+                <RouterLink to="/categories" class="btn btn-light border px-4">取消</RouterLink>
+                <button type="submit" class="btn btn-success text-white px-4 shadow-sm" :disabled="isSubmitting">
+                  <span v-if="isSubmitting" class="spinner-border spinner-border-sm" role="status"></span>
+                  <i v-else class="bi bi-check-lg"></i>
+                  {{ isSubmitting ? '儲存中...' : '確認儲存' }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <form @submit.prevent="saveCategory">
-          <div class="mb-3">
-            <label class="form-label fw-bold">分類名稱 <span class="text-danger">*</span></label>
-            <input type="text" v-model="form.name" class="form-control" placeholder="請輸入分類名稱" required>
-          </div>
-
-          <div class="d-flex justify-content-end gap-2">
-            <RouterLink to="/categories" class="btn btn-secondary">取消</RouterLink>
-            <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-              {{ isSubmitting ? '儲存中...' : '儲存' }}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   </div>
